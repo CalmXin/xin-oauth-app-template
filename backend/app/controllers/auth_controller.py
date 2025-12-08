@@ -75,7 +75,6 @@ async def callback(
 
     # 这里你可以设置 session、JWT cookie、或返回前端 token
     return JSONResponse({
-        "message": "Login successful",
         "user": user_info,
         "access_token": access_token,
         "id_token": id_token
