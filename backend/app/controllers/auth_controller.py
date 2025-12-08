@@ -63,12 +63,12 @@ async def callback(
 
     # 可选：验证并解析 id_token
     try:
-        decoded = await JwtUtil().verify_jwt_token(id_token, env_getter.auth_client_id)
+        decoded = await JwtUtil().verify_jwt_token(id_token)
         user_info = {
             "sub": decoded.get("sub"),
             "name": decoded.get("name"),
             "email": decoded.get("email"),
-            "avatar": decoded.get("picture")
+            "avatar": decoded.get("avatar")
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid ID token: {e}")

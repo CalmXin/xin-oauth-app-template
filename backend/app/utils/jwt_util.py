@@ -1,8 +1,12 @@
+import json.decoder
+
 import anyio
 import httpx
+from diskcache import Cache
 from jose import jwt, jwk, JWTError
 
-from app.core.cache import cache
+from app.core.cache import cache as _cache
+from app.core.error import AppException, ErrorCodeEnum
 from app.core.settings import env_getter
 
 
@@ -14,8 +18,8 @@ class JwtUtil:
     JWKS_KEY = 'jwks'
     ISSUER = env_getter.auth_endpoint
 
-    def __init__(self):
-        self.cache = cache
+    def __init__(self, cache: Cache | None = None):
+        self.cache = cache or _cache
 
     @staticmethod
     async def _fetch_jwks() -> dict:
@@ -23,8 +27,15 @@ class JwtUtil:
 
         async with httpx.AsyncClient() as client:
             resp = await client.get(f'{env_getter.auth_endpoint}/.well-known/jwks')
-            resp.raise_for_status()
-            return resp.json()
+            try:
+                resp.raise_for_status()
+                return resp.json()
+
+            except httpx.HTTPStatusError:
+                raise AppException(ErrorCodeEnum.HTTP_REQUEST_FAILED, "Failed to fetch JWKS")
+
+            except json.decoder.JSONDecodeError:
+                raise AppException(ErrorCodeEnum.JSON_DECODE_ERROR, "Failed to parse JWKS")
 
     async def get_jwks(self) -> dict:
         """获取 JWKS，使用锁避免重复请求"""
@@ -55,28 +66,25 @@ class JwtUtil:
     async def verify_jwt_token(
             self,
             token: str,
-            expected_audience: str | list[str],
+            expected_audience: str | list[str] = None,
     ) -> dict:
         """
         通用 JWT 验证函数，适用于 id_token 和 access_token
 
-        Args:
-            token: 要验证的 JWT 字符串
-            expected_audience: 期望的 audience（如 client_id 或 Casdoor API 地址）
-
-        Returns:
-            解码后的 payload（已验证）
-
-        Raises:
-            ValueError: 验证失败
+        :param token: 要验证的 JWT 字符串
+        :param expected_audience: 期望的 audience（如 client_id 或 Casdoor API 地址）
+        :return 解码后的 payload（已验证）
+        :raise AppException: 验证失败
         """
+
+        expected_audience = expected_audience or env_getter.auth_client_id
 
         try:
             # 1. 获取未验证的 header 以提取 kid
             header = jwt.get_unverified_header(token)
             kid = header.get("kid")
             if not kid:
-                raise ValueError("Missing 'kid' in JWT header")
+                raise AppException(ErrorCodeEnum.JWT_MISSING_CONDITION, "Missing 'kid' in JWT header")
 
             # 2. 获取 JWKS 并查找公钥
             jwks = await self.get_jwks()
@@ -87,7 +95,7 @@ class JwtUtil:
                     break
 
             if public_key is None:
-                raise ValueError(f"No public key found for kid={kid}")
+                raise AppException(ErrorCodeEnum.JWT_MISSING_CONDITION, f"No public key found for kid={kid}")
 
             # 3. 先不验证 aud/iss/exp，只验证签名，以便自定义 aud 校验
             unverified_payload = jwt.decode(
@@ -104,16 +112,21 @@ class JwtUtil:
 
             # 4. 手动校验 iss
             if unverified_payload.get("iss") != self.ISSUER:
-                raise ValueError(
-                    f"Invalid issuer. Expected {self.ISSUER}, got {unverified_payload.get('iss')}")
+                raise AppException(
+                    ErrorCodeEnum.JWT_UNEXCEPTED,
+                    f"Invalid issuer. Expected {self.ISSUER}, got {unverified_payload.get('iss')}"
+                )
 
             # 5. 手动校验 aud
             token_aud = unverified_payload.get("aud")
             if not token_aud:
-                raise ValueError("Missing 'aud' claim")
+                raise AppException(ErrorCodeEnum.JWT_UNEXCEPTED, "Missing 'aud' claim")
 
             if not self._match_audience(token_aud, expected_audience):
-                raise ValueError(f"Audience mismatch. Token aud: {token_aud}, expected: {expected_audience}")
+                raise AppException(
+                    ErrorCodeEnum.JWT_UNEXCEPTED,
+                    f"Audience mismatch. Token aud: {token_aud}, expected: {expected_audience}"
+                )
 
             # 6. 手动校验 exp/nbf/iat（带容差）
             jwt.decode(
@@ -133,7 +146,7 @@ class JwtUtil:
             return unverified_payload
 
         except JWTError as e:
-            raise ValueError(f"JWT validation failed: {str(e)}")
+            raise AppException(ErrorCodeEnum.JWT_INVALID, f"JWT validation failed: {e}")
 
         except Exception as e:
-            raise ValueError(f"Unexpected error during JWT verification: {str(e)}")
+            raise AppException(ErrorCodeEnum.JWT_UNEXCEPTED, f"Unexpected error during JWT verification: {e}")
