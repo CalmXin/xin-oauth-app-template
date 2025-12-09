@@ -2,11 +2,11 @@ import json.decoder
 
 import anyio
 import httpx
-from diskcache import Cache
 from jose import jwt, jwk, JWTError
 
-from app.core.cache import cache as _cache
+from app.core.cache import cache as _cache, AsyncCache
 from app.core.error import AppException, ErrorCodeEnum
+from app.core.logger import logger
 from app.core.settings import env_getter
 
 
@@ -18,7 +18,7 @@ class JwtUtil:
     JWKS_KEY = 'jwks'
     ISSUER = env_getter.auth_endpoint
 
-    def __init__(self, cache: Cache | None = None):
+    def __init__(self, cache: AsyncCache | None = None):
         self.cache = cache or _cache
 
     @staticmethod
@@ -40,13 +40,13 @@ class JwtUtil:
     async def get_jwks(self) -> dict:
         """获取 JWKS，使用锁避免重复请求"""
 
-        cached_jwks = self.cache.get(self.JWKS_KEY)
+        cached_jwks = await self.cache.get(self.JWKS_KEY)
 
         if cached_jwks is None:
             async with self._jwt_lock:
                 if cached_jwks is None:
                     jwks = await self._fetch_jwks()
-                    self.cache.set(self.JWKS_KEY, jwks, expire=3600)
+                    await self.cache.set(self.JWKS_KEY, jwks, expire=3600)
                     return jwks
 
         return cached_jwks
