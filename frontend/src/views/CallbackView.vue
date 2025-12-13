@@ -1,4 +1,5 @@
 <template>
+    <div>Loading...</div>
 </template>
 
 <script setup>
@@ -16,6 +17,15 @@ try {
     appStore.set('access_token', access_token)
     appStore.set('user', user)
     logger.info('登录成功', user)
+
+    if (appStore.has('current_path')) {
+        const currentPath = appStore.get('current_path')
+        appStore.remove('current_path')
+        await appRouter.replace(currentPath)
+    } else {
+        await appRouter.replace('/')
+    }
+
 } catch (e) {
     logger.error(e.toObject())
 }

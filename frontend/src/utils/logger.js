@@ -7,7 +7,7 @@ const formatTimeWithMs = (date = new Date()) => {
 }
 
 const formatMessage = (level, namespace) => {
-    return `${formatTimeWithMs()} [${level}] [${namespace}]`
+    return `${formatTimeWithMs()} [${level}] [APP] [${namespace}]`
 }
 
 /**

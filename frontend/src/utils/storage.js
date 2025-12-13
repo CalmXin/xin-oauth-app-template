@@ -44,7 +44,12 @@ class Storage {
      */
     get(key) {
         const fullKey = this._fullKey(key)
-        return localStorage.getItem(fullKey)
+        const value = localStorage.getItem(fullKey)
+        if (value === null) {
+            return null
+        } else {
+            return JSON.parse(value)
+        }
     }
 
     /**
@@ -83,7 +88,7 @@ class Storage {
      * @returns {boolean}
      */
     has(key) {
-        return this.get(key) !== undefined;
+        return this.get(key) !== null;
     }
 }
 

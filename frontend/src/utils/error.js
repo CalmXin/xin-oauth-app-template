@@ -3,11 +3,12 @@
  */
 const ErrorCode = {
     // HTTP
-    HTTP_REQUEST_FAILED: 'http_request_failed',
-    HTTP_TIMEOUT: 'http_timeout',
+    HTTP_REQUEST_FAILED: 'http_request_failed', // HTTP 请求失败
+    HTTP_TIMEOUT: 'http_timeout', // HTTP 请求超时
+    HTTP_TOKEN_EXPIRED: 'http_token_expired', // HTTP 令牌已过期
 
     // JSON
-    JSON_DECODE_ERROR: 'json_decode_error',
+    JSON_DECODE_ERROR: 'json_decode_error', // JSON 解码错误
 };
 
 // 冻结对象，防止意外修改（可选）
