@@ -15,7 +15,7 @@ def make_state() -> str:
     return secrets.token_urlsafe(32)
 
 
-def set_state_cookie(response: Response, state: str):
+def set_state_cookie(response: Response, state: str) -> None:
     """设置 state cookie"""
 
     signed = serializer.dumps(state)
