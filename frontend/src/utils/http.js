@@ -23,9 +23,12 @@ class Http {
     async request(url, options = {}) {
         const fullUrl = url.startsWith('/') ? `${this.baseURL}${url}` : url
         const config = {
+            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json', ...options.headers,
-            }, ...options,
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+            ...options,
         }
 
         // 设置超时
@@ -34,11 +37,18 @@ class Http {
 
         try {
             const response = await fetch(fullUrl, {
-                ...config, signal: controller.signal,
+                ...config,
+                signal: controller.signal,
             });
 
             if (!response.ok) {
-                throw new AppError(ErrorCode.HTTP_REQUEST_FAILED, `HTTP ${response.status} ${response.statusText}`)
+                throw new AppError(
+                    ErrorCode.HTTP_REQUEST_FAILED,
+                    `HTTP ${response.status} ${response.statusText}`,
+                    {
+                        'text': await response.json()
+                    }
+                )
             }
 
             return await response.json()
@@ -58,12 +68,15 @@ class Http {
     /**
      * 发送 GET 请求
      * @param {string} url
+     * @param {object} data
      * @param {object} options
      * @returns {Promise<object>}
      * @throws {AppError}
      */
-    async get(url, options = {}) {
-        return this.request(url, {method: 'GET', ...options})
+    async get(url, data, options = {}) {
+        const query = data ? `?${new URLSearchParams(data).toString()}` : ''
+        const fullUrl = data ? `${url}${query}` : url
+        return this.request(fullUrl, {method: 'GET', ...options})
     }
 
     /**
