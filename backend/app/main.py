@@ -2,12 +2,13 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.controllers.auth_controller import auth_router
+from app.core.settings import env_getter
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=[env_getter.auth_frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
