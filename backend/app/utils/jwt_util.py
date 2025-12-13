@@ -2,10 +2,14 @@ import json.decoder
 
 import anyio
 import httpx
+from fastapi import HTTPException
 from jose import jwt, jwk, JWTError
+from starlette.requests import Request
 
 from app.core.cache import cache as _cache, AsyncCache
+from app.core.constants import HttpCodeEnum
 from app.core.error import AppException, ErrorCodeEnum
+from app.core.logger import logger
 from app.core.settings import env_getter
 
 
@@ -149,3 +153,23 @@ class JwtUtil:
 
         except Exception as e:
             raise AppException(ErrorCodeEnum.JWT_UNEXCEPTED, f"Unexpected error during JWT verification: {e}")
+
+
+async def get_current_user(request: Request) -> dict:
+    """获取当前用户信息"""
+
+    token = request.headers.get("Authorization")
+    if not token:
+        raise HTTPException(HttpCodeEnum.UNAUTHORIZED.value, "Missing Authorization header")
+
+    if not token.startswith("Bearer "):
+        raise HTTPException(HttpCodeEnum.UNAUTHORIZED.value, "Invalid Authorization header")
+
+    token = token[7:]
+
+    try:
+        return await JwtUtil().verify_jwt_token(token)
+
+    except AppException as e:
+        logger.error(f'{e=}')
+        raise HTTPException(HttpCodeEnum.UNAUTHORIZED.value, e.message)

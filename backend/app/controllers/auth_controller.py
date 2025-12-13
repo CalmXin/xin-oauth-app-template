@@ -5,6 +5,7 @@ from fastapi import APIRouter, Request, HTTPException
 from fastapi.params import Query
 from starlette.responses import RedirectResponse, JSONResponse
 
+from app.core.constants import HttpCodeEnum
 from app.core.settings import env_getter
 from app.utils.auth_util import make_state, set_state_cookie, verify_state
 from app.utils.jwt_util import JwtUtil
@@ -43,7 +44,7 @@ async def callback(
     """处理 Casdoor 回调，换取 access_token 和 id_token"""
 
     if not verify_state(request, state):
-        raise HTTPException(status_code=400, detail="Invalid or missing state")
+        raise HTTPException(status_code=HttpCodeEnum.BAD_REQUEST.value, detail="Invalid or missing state")
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(f"{env_getter.auth_endpoint}/api/login/oauth/access_token", data={
@@ -55,7 +56,7 @@ async def callback(
         })
 
     if resp.status_code != 200:
-        raise HTTPException(status_code=400, detail="Failed to fetch token")
+        raise HTTPException(status_code=HttpCodeEnum.BAD_REQUEST.value, detail="Failed to fetch token")
 
     token_data = resp.json()
     access_token = token_data.get("access_token")
@@ -71,7 +72,7 @@ async def callback(
             "avatar": decoded.get("avatar")
         }
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid ID token: {e}")
+        raise HTTPException(status_code=HttpCodeEnum.UNAUTHORIZED.value, detail=f"Invalid ID token: {e}")
 
     # 这里你可以设置 session、JWT cookie、或返回前端 token
     return JSONResponse({
