@@ -1,5 +1,7 @@
 import {AppError, ErrorCode} from "@/utils/error.js";
 import CONFIG from "@/config.js";
+import {appStore} from "@/utils/storage.js";
+import {appRouter} from "@/utils/router.js";
 
 
 class Http {
@@ -23,14 +25,22 @@ class Http {
      */
     async request(url, options = {}) {
         const fullUrl = url.startsWith('/') ? `${this.baseURL}${url}` : url
+
+        // 配置 headers
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        }
+
+        if (appStore.has('access_token')) {
+            headers['Authorization'] = `Bearer ${appStore.get('access_token')}`
+        }
+
         const config = {
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
+            headers,
             ...options,
-        }
+        };
 
         // 设置超时
         const controller = new AbortController();
@@ -41,6 +51,13 @@ class Http {
                 ...config,
                 signal: controller.signal,
             });
+
+            if (response.status === 401) {
+                appStore.remove('access_token')
+                appStore.set('current_path', appRouter.currentPath())
+                await appRouter.replace(`/login}`)
+                throw new AppError(ErrorCode.HTTP_REQUEST_FAILED, '登录已过期，请重新登录')
+            }
 
             if (!response.ok) {
                 throw new AppError(
