@@ -1,4 +1,5 @@
 import {AppError, ErrorCode} from "@/utils/error.js";
+import CONFIG from "@/config.js";
 
 class Http {
 
@@ -101,7 +102,7 @@ class Http {
     }
 }
 
-const http = new Http('http://127.0.0.1:8000')
+const http = new Http(CONFIG.apiBaseUrl)
 export {
     http
 }

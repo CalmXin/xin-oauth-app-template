@@ -40,7 +40,7 @@ class Storage {
     /**
      * 获取数据
      * @param {string} key
-     * @returns {string || null}
+     * @returns {string | null}
      */
     get(key) {
         const fullKey = this._fullKey(key)
