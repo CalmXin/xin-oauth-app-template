@@ -2,7 +2,7 @@ import {createLogger} from "@/utils/logger.js";
 
 const logger = createLogger('store')
 
-class Store {
+class Storage {
 
     constructor(namespace) {
         this.namespace = namespace ?? 'app'
@@ -87,9 +87,9 @@ class Store {
     }
 }
 
-const appStore = new Store('app')
+const appStore = new Storage('app')
 
 export {
     appStore,
-    Store
+    Storage
 }
