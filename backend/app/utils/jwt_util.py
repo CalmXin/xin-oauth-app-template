@@ -6,7 +6,6 @@ from jose import jwt, jwk, JWTError
 
 from app.core.cache import cache as _cache, AsyncCache
 from app.core.error import AppException, ErrorCodeEnum
-from app.core.logger import logger
 from app.core.settings import env_getter
 
 
