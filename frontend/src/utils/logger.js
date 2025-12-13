@@ -17,7 +17,7 @@ const formatMessage = (level, namespace) => {
  */
 const createLogger = (namespace = 'GLOBAL') => {
     return {
-        debug: (...args) => console.log(formatMessage('LOG', namespace), ...args),
+        debug: (...args) => console.log(formatMessage('DEBUG', namespace), ...args),
         info: (...args) => console.info(formatMessage('INFO', namespace), ...args),
         warn: (...args) => console.warn(formatMessage('WARN', namespace), ...args),
         error: (...args) => console.error(formatMessage('ERROR', namespace), ...args),
