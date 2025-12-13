@@ -1,6 +1,7 @@
 import {AppError, ErrorCode} from "@/utils/error.js";
 import CONFIG from "@/config.js";
 
+
 class Http {
 
     /**
@@ -8,7 +9,7 @@ class Http {
      * @param {string} baseURL
      * @param {number} timeout
      */
-    constructor(baseURL, timeout = 120) {
+    constructor(baseURL, timeout = 120 * 1000) {
         this.baseURL = baseURL
         this.timeout = timeout
     }
@@ -46,7 +47,7 @@ class Http {
                     ErrorCode.HTTP_REQUEST_FAILED,
                     `HTTP ${response.status} ${response.statusText}`,
                     {
-                        'text': await response.json()
+                        'response': await response.json()
                     }
                 )
             }
