@@ -4,6 +4,7 @@
 const ErrorCode = {
     // HTTP
     HTTP_REQUEST_FAILED: 'http_request_failed',
+    HTTP_TIMEOUT: 'http_timeout',
 
     // JSON
     JSON_DECODE_ERROR: 'json_decode_error',
