@@ -1,5 +1,7 @@
-const CONFIG = {
-    apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+const env = import.meta.env
+
+const appConfig = {
+    apiBaseUrl: env.VITE_API_BASE_URL,
 }
 
-export default CONFIG
+export default appConfig

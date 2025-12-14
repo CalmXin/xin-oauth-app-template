@@ -1,5 +1,5 @@
 import {AppError, ErrorCode} from "@/utils/error.js";
-import CONFIG from "@/config.js";
+import appConfig from "@/config.js";
 import {appStore} from "@/utils/storage.js";
 import {appRouter} from "@/utils/router.js";
 
@@ -133,7 +133,7 @@ class Http {
     }
 }
 
-const http = new Http(CONFIG.apiBaseUrl)
+const http = new Http(appConfig.apiBaseUrl)
 export {
     http
 }
