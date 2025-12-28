@@ -12,11 +12,10 @@ class EnvGetter(BaseSettings):
     auth_redirect_uri: str = Field(...)
     auth_frontend_url: str = Field(...)
     auth_scope: str = 'openid profile email'
-    auth_state_cookie_name: str = 'oauth_state'
+    auth_state_key_name: str = 'oauth_state'
 
     # 关于项目的配置
     app_secret_key: str = Field(...)
-
 
 
 env_getter = EnvGetter()

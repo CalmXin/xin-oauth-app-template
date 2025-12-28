@@ -1,9 +1,8 @@
 import secrets
 
 from itsdangerous import URLSafeSerializer, BadSignature
-from starlette.requests import Request
-from starlette.responses import Response
 
+from app.core.cache import cache
 from app.core.settings import env_getter
 
 serializer = URLSafeSerializer(env_getter.app_secret_key)
@@ -15,28 +14,23 @@ def make_state() -> str:
     return secrets.token_urlsafe(32)
 
 
-def set_state_cookie(response: Response, state: str) -> None:
+async def set_state_cache(state: str) -> None:
     """设置 state cookie"""
 
     signed = serializer.dumps(state)
-    response.set_cookie(
-        key=env_getter.auth_state_cookie_name,
-        value=signed,
-        httponly=True,
-        secure=False,  # 生产环境设为 True（需 HTTPS）
-        samesite="lax"
-    )
+    await cache.set(f'{env_getter.auth_state_key_name}:{state}', signed, expire=5 * 60)  # 缓存 5 分钟
 
 
-def verify_state(request: Request, received_state: str) -> bool:
+async def verify_state(received_state: str) -> bool:
     """验证 state"""
 
-    signed = request.cookies.get(env_getter.auth_state_cookie_name)
+    signed = await cache.get(f'{env_getter.auth_state_key_name}:{received_state}')
     if not signed:
         return False
 
     try:
         original = serializer.loads(signed)
+        await cache.delete(f'{env_getter.auth_state_key_name}:{received_state}')  # 验证存在后删除
         return original == received_state
 
     except BadSignature:

@@ -1,13 +1,13 @@
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.params import Query
 from starlette.responses import RedirectResponse, JSONResponse
 
 from app.core.constants import HttpCodeEnum
 from app.core.settings import env_getter
-from app.utils.auth_util import make_state, set_state_cookie, verify_state
+from app.utils.auth_util import make_state, set_state_cache, verify_state
 from app.utils.jwt_util import JwtUtil
 
 auth_router = APIRouter(prefix='/auth')
@@ -18,6 +18,7 @@ async def login():
     """跳转到 Casdoor 授权页面"""
 
     state = make_state()
+    await set_state_cache(state)
 
     params = urlencode({
         'client_id': env_getter.auth_client_id,
@@ -29,21 +30,17 @@ async def login():
 
     auth_url = f"{env_getter.auth_endpoint}/login/oauth/authorize?{params}"
 
-    response = RedirectResponse(auth_url)
-    set_state_cookie(response, state)
-
-    return response
+    return RedirectResponse(auth_url)
 
 
 @auth_router.get('/callback')
 async def callback(
-        request: Request,
         code: str = Query(...),
         state: str = Query(...),
 ):
     """处理 Casdoor 回调，换取 access_token 和 id_token"""
 
-    if not verify_state(request, state):
+    if not await verify_state(state):
         raise HTTPException(status_code=HttpCodeEnum.BAD_REQUEST.value, detail="Invalid or missing state")
 
     async with httpx.AsyncClient() as client:
