@@ -55,7 +55,7 @@ class Http {
             if (response.status === 401) {
                 appStore.remove('access_token')
                 appStore.set('current_path', appRouter.currentPath())
-                await appRouter.replace(`/login}`)
+                await appRouter.replace(`/login`)
                 throw new AppError(ErrorCode.HTTP_REQUEST_FAILED, '登录已过期，请重新登录')
             }
 
