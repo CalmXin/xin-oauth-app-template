@@ -32,6 +32,17 @@ const router = createRouter({
                 guestOnly: true,
             },
         },
+
+        // 404 页面，放到末尾
+        {
+            path: '/:pathMatch(.*)*',
+            name: 'NotFound',
+            component: () => import('@/views/NotFoundView.vue'),
+            meta: {
+                requiresAuth: false,
+                guestOnly: false,
+            },
+        },
     ],
 })
 

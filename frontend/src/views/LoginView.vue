@@ -1,5 +1,5 @@
 <template>
-
+    <div style="font-size: 25px">Redirecting to the login page...</div>
 </template>
 
 <script setup>
