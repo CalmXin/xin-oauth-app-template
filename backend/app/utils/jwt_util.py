@@ -171,5 +171,5 @@ async def get_current_user(request: Request) -> dict:
         return await JwtUtil().verify_jwt_token(token)
 
     except AppException as e:
-        logger.error(f'{e=}')
-        raise HTTPException(HttpCodeEnum.UNAUTHORIZED.value, e.message)
+        logger.warning(f'{e=}')
+        raise HTTPException(HttpCodeEnum.UNAUTHORIZED.value, str(e))

@@ -1,6 +1,6 @@
 import secrets
 
-from itsdangerous import URLSafeSerializer, BadSignature
+from itsdangerous import URLSafeSerializer
 
 from app.core.cache import cache
 from app.core.settings import env_getter
@@ -15,10 +15,9 @@ def make_state() -> str:
 
 
 async def set_state_cache(state: str) -> None:
-    """设置 state cookie"""
+    """设置 state"""
 
-    signed = serializer.dumps(state)
-    await cache.set(f'{env_getter.auth_state_key_name}:{state}', signed, expire=5 * 60)  # 缓存 5 分钟
+    await cache.set(f'{env_getter.auth_state_key_name}:{state}', '1', expire=5 * 60)  # 缓存 5 分钟
 
 
 async def verify_state(received_state: str) -> bool:
@@ -28,10 +27,5 @@ async def verify_state(received_state: str) -> bool:
     if not signed:
         return False
 
-    try:
-        original = serializer.loads(signed)
-        await cache.delete(f'{env_getter.auth_state_key_name}:{received_state}')  # 验证存在后删除
-        return original == received_state
-
-    except BadSignature:
-        return False
+    await cache.delete(f'{env_getter.auth_state_key_name}:{received_state}')  # 验证存在后删除
+    return True
