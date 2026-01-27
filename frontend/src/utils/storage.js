@@ -1,6 +1,6 @@
 import {createLogger} from "@/utils/logger.js";
 
-const logger = createLogger('store')
+const logger = createLogger('storage')
 
 class AppStorage {
 
@@ -92,9 +92,9 @@ class AppStorage {
     }
 }
 
-const appStore = new AppStorage('app')
+const appStorage = new AppStorage('app')
 
 export {
-    appStore,
+    appStorage,
     AppStorage
 }

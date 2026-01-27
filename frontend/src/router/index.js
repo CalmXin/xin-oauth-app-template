@@ -1,5 +1,5 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import {appStore} from "@/utils/storage.js";
+import {appStorage} from "@/utils/storage.js";
 import {logger} from "@/utils/logger.js";
 
 const router = createRouter({
@@ -47,10 +47,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    if (to.meta.requiresAuth && !appStore.has('access_token')) {
-        appStore.set('current_path', to.fullPath)
+    if (to.meta.requiresAuth && !appStorage.has('access_token')) {
+        appStorage.set('current_path', to.fullPath)
         next({name: 'login'})
-    } else if (to.meta.guestOnly && appStore.has('access_token')) {
+    } else if (to.meta.guestOnly && appStorage.has('access_token')) {
         next({name: 'home'})
     } else {
         next()

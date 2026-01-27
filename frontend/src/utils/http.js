@@ -1,6 +1,6 @@
 import {AppError, ErrorCode} from "@/utils/error.js";
 import appConfig from "@/config.js";
-import {appStore} from "@/utils/storage.js";
+import {appStorage} from "@/utils/storage.js";
 import {appRouter} from "@/utils/router.js";
 
 
@@ -32,8 +32,8 @@ class AppHttp {
             ...options.headers,
         }
 
-        if (appStore.has('access_token')) {
-            headers['Authorization'] = `Bearer ${appStore.get('access_token')}`
+        if (appStorage.has('access_token')) {
+            headers['Authorization'] = `Bearer ${appStorage.get('access_token')}`
         }
 
         const config = {
@@ -53,8 +53,8 @@ class AppHttp {
             });
 
             if (response.status === 401) {
-                appStore.remove('access_token')
-                appStore.set('current_path', appRouter.currentPath())
+                appStorage.remove('access_token')
+                appStorage.set('current_path', appRouter.currentPath())
                 await appRouter.replace(`/login`)
                 throw new AppError(ErrorCode.HTTP_REQUEST_FAILED, '登录已过期，请重新登录')
             }
