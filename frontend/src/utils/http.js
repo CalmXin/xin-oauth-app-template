@@ -4,7 +4,7 @@ import {appStore} from "@/utils/storage.js";
 import {appRouter} from "@/utils/router.js";
 
 
-class Http {
+class AppHttp {
 
     /**
      * 创建 HTTP 实例
@@ -133,7 +133,7 @@ class Http {
     }
 }
 
-const http = new Http(appConfig.apiBaseUrl)
+const http = new AppHttp(appConfig.apiBaseUrl)
 export {
     http
 }
