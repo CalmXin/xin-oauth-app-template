@@ -3,7 +3,7 @@ from typing import Any
 import anyio.to_thread
 from diskcache import Cache
 
-from .constants import WORK_DIR
+from app.core.constants import WORK_DIR
 
 _cache_file_path = WORK_DIR / 'data' / 'cache'
 _cache_file_path.mkdir(parents=True, exist_ok=True)
