@@ -165,7 +165,7 @@ async def get_current_user(request: Request) -> dict:
     if not token.startswith("Bearer "):
         raise HTTPException(HttpCodeEnum.UNAUTHORIZED.value, "Invalid Authorization header")
 
-    token = token[7:]
+    token = token.removeprefix("Bearer ")
 
     try:
         return await JwtUtil().verify_jwt_token(token)
