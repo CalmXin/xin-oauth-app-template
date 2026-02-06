@@ -1,7 +1,9 @@
 fastapi
 httpx
 pydantic
-python-jose
+python-jose[cryptography]
 loguru
 diskcache
 pydantic-settings
+itsdangerous
+uvicorn
