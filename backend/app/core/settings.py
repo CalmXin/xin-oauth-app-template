@@ -1,5 +1,5 @@
 from pydantic import Field
-from pydantic.v1 import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class EnvGetter(BaseSettings):

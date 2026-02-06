@@ -2,3 +2,4 @@
 /backend/data/
 /backend/settings.env
 /frontend/.env
+/backend/app/test.py
