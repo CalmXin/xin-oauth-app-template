@@ -37,7 +37,7 @@ class AppError extends Error {
         }
 
         super(message);
-        this.name = 'AppException';
+        this.name = 'AppError';
         this.code = code;
         this.message = message;
         this.details = details || {};
@@ -65,6 +65,15 @@ class AppError extends Error {
      */
     toString() {
         return `[${this.code}] ${this.message}`;
+    }
+
+    /**
+     * 获取错误的提示信息
+     * @returns {string}
+     */
+    getResponseMessage() {
+        const response = this.details.response
+        return response.detail ?? response.message
     }
 }
 
