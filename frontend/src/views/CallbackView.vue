@@ -1,5 +1,5 @@
 <template>
-    <div style="font-size: 25px">Wait a moment...</div>
+  <div style="font-size: 25px">Wait a moment...</div>
 </template>
 
 <script setup>
