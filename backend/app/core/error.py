@@ -19,10 +19,10 @@ class ErrorCodeEnum(Enum):
 class AppException(Exception):
     """自定义错误类"""
 
-    def __init__(self, code: ErrorCodeEnum, message: str, details: dict | None = None):
+    def __init__(self, code: ErrorCodeEnum, message: str, detail: dict | None = None):
         self.code = code
         self.message = message
-        self.details = details or {}
+        self.detail = detail or {}
         super().__init__(message)
 
     def __repr__(self):
@@ -31,6 +31,6 @@ class AppException(Exception):
             f'('
             f'code={self.code!r}, '
             f'message={self.message!r}, '
-            f'details={self.details!r}'
+            f'details={self.detail!r}'
             f')'
         )
